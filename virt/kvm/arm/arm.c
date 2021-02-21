@@ -40,15 +40,12 @@
 #include <asm/kvm_coproc.h>
 #include <asm/sections.h>
 
-<<<<<<< HEAD
 #include <kvm/arm_hypercalls.h>
 #include <kvm/arm_pmu.h>
 #include <kvm/arm_psci.h>
-=======
 #ifdef CONFIG_VERIFIED_KVM
 #include <asm/hypsec_host.h>
 #endif
->>>>>>> 9a6f405f7ae1... apply hypsec changes from 5.4
 
 #ifdef REQUIRES_VIRT
 __asm__(".arch_extension	virt");
@@ -122,7 +119,6 @@ int kvm_arch_check_processor_compat(void)
 	return 0;
 }
 
-<<<<<<< HEAD
 int kvm_vm_ioctl_enable_cap(struct kvm *kvm,
 			    struct kvm_enable_cap *cap)
 {
@@ -143,7 +139,6 @@ int kvm_vm_ioctl_enable_cap(struct kvm *kvm,
 
 	return r;
 }
-=======
 #ifdef CONFIG_VERIFIED_KVM
 struct kvm* hypsec_arch_alloc_vm(void)
 {
@@ -155,7 +150,6 @@ struct kvm* hypsec_arch_alloc_vm(void)
 	return kvm;
 }
 #endif
->>>>>>> 9a6f405f7ae1... apply hypsec changes from 5.4
 
 /**
  * kvm_arch_init_vm - initializes a VM data structure
@@ -1544,20 +1538,15 @@ static void cpu_hyp_reinit(void)
 
 	if (is_kernel_in_hyp_mode())
 		kvm_timer_init_vhe();
-<<<<<<< HEAD
-	else
-		cpu_init_hyp_mode();
-=======
 	else {
 #ifndef CONFIG_VERIFIED_KVM
-		cpu_init_hyp_mode(NULL);
+		cpu_init_hyp_mode();
 #else
 		//init hyp mode only once!
 		if (__hyp_get_vectors() == hyp_default_vectors)
-			cpu_init_hyp_mode(NULL);
+			cpu_init_hyp_mode();
 #endif
 	}
->>>>>>> 9a6f405f7ae1... apply hypsec changes from 5.4
 
 	kvm_arm_init_debug();
 
