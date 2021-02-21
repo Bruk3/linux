@@ -106,7 +106,6 @@ el1_sync:				// Guest trapped into EL2
 	ccmp	x0, #ESR_ELx_EC_HVC32, #4, ne
 #ifndef CONFIG_VERIFIED_KVM
 	b.ne	el1_trap
-
 	mrs	x1, vttbr_el2		// If vttbr is valid, the guest
 	cbnz	x1, el1_hvc_guest	// called HVC
 #else
@@ -114,6 +113,7 @@ el1_sync:				// Guest trapped into EL2
 	cmp	x0, #ESR_ELx_EC_DABT_LOW
 	b.eq	5f
 	cmp	x0, #ESR_ELx_EC_IABT_LOW
+	bl 		bruk_asm_print_before_trap
 	b.ne	el1_trap
 
 5:

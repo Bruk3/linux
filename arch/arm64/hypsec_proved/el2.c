@@ -65,6 +65,16 @@ static void __hyp_text protect_el2_mem(void)
 }
 
 extern u32 __init_stage2_translation(void);
+
+void __hyp_text bruk_asm_print(struct s2_host_regs *unused)
+{
+    print_string("\r in bruk_asm_printt!!!\n");
+}
+
+void __hyp_text bruk_asm_print_before_trap(struct s2_host_regs *unused)
+{
+    print_string("\r in bruk_asm_print before trap!!!\n");
+}
 //TODO: Did we prove the following?
 static void __hyp_text hvc_enable_s2_trans(void)
 {
