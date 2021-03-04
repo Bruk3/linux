@@ -128,7 +128,7 @@ void __hyp_text prep_abort(u32 vmid, u32 vcpuid)
     u64 fault_ipa = (get_shadow_ctxt(vmid, vcpuid, V_HPFAR_EL2) / 16UL) * 4096UL;
     bool is_write;
 
-    if (fault_ipa < MAX_MMIO_ADDR)
+    if (fault_ipa < MAX_MMIO_ADDR || fault_ipa >= 0x4000000000)
     {
 	/*if (fault_ipa > 0xc000000 && fault_ipa < 0xe000000) {
 		u64 flags = get_shadow_ctxt(vmid, vcpuid, V_FLAGS);
