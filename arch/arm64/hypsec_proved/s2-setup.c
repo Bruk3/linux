@@ -86,7 +86,7 @@ u32 __hyp_text __init_stage2_translation(void)
 			VTCR_EL2_VS_16BIT :
 			VTCR_EL2_VS_8BIT;
 
-	val |= 0x40;
+	val |= VTCR_EL2_SL0_LVL1;
 	printhex_ul(val);
 
 	write_sysreg(val, vtcr_el2);

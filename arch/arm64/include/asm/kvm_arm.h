@@ -201,7 +201,7 @@
 // uncomment the following for non-m400
 //#define VTCR_EL2_FLAGS		(VTCR_EL2_COMMON_BITS | VTCR_EL2_TGRAN_FLAGS1)
 //#define VTCR_EL2_TGRAN_FLAGS1           (VTCR_EL2_TG0_4K | VTCR_EL2_SL0_LVL0)
-//#define VTCR_EL2_SL0_LVL0       	(1 << (VTCR_EL2_SL0_SHIFT + 1))
+#define VTCR_EL2_SL0_LVL1       	(1 << (VTCR_EL2_SL0_SHIFT))
 #endif
 #define VTCR_EL2_IPA(vtcr)		(64 - ((vtcr) & VTCR_EL2_T0SZ_MASK))
 

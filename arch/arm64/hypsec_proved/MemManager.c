@@ -49,6 +49,7 @@ void __hyp_text clear_vm_page(u32 vmid, u64 pfn)
         set_pfn_map(pfn, 0UL);
 	clear_phys_page(pfn);
     }
+	__flush_dcache_area(__el2_va(pfn << PAGE_SHIFT), PAGE_SIZE);
     release_lock_s2page();
 }
 
@@ -86,6 +87,7 @@ void __hyp_text assign_pfn_to_vm(u32 vmid, u64 gfn, u64 pfn)
 		}
 	}
 
+	__flush_dcache_area(__el2_va(pfn << PAGE_SHIFT), PAGE_SIZE);
 	release_lock_s2page();
 }
 
