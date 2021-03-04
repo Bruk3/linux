@@ -20,6 +20,8 @@
 #include <asm/kvm_asm.h>
 #include <asm/kvm_hyp.h>
 
+#include <asm/hypsec_host.h>
+
 u32 __hyp_text __init_stage2_translation(void)
 {
 	u64 val = VTCR_EL2_FLAGS;
@@ -83,6 +85,9 @@ u32 __hyp_text __init_stage2_translation(void)
 	val |= (tmp == ID_AA64MMFR1_VMIDBITS_16) ?
 			VTCR_EL2_VS_16BIT :
 			VTCR_EL2_VS_8BIT;
+
+	val |= 0x40;
+	printhex_ul(val);
 
 	write_sysreg(val, vtcr_el2);
 

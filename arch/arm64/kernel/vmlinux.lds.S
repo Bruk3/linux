@@ -253,7 +253,7 @@ SECTIONS
 #ifdef CONFIG_VERIFIED_KVM
 	. = ALIGN(SEGMENT_ALIGN);
 	dtb_copy_start = .;
-	. += SZ_2M * 4;
+	. += SZ_2M * 24;
 	dtb_copy_end =.;	
 
 	stage2_pgs_start = .;

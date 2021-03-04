@@ -15,7 +15,8 @@ void __hyp_text map_page_host(u64 addr)
 	acquire_lock_s2page();
 	owner = get_pfn_owner(pfn);
 	count = get_pfn_count(pfn);
-	if (owner == INVALID_MEM) {
+	// if (owner == INVALID_MEM) {
+	if (!(addr >= 0x4000000000 && addr < 0x5000000000)) {
 		perm = pgprot_val(PAGE_S2_DEVICE);
 		perm |= S2_RDWR;
 		new_pte = (addr & PAGE_MASK) + perm;
