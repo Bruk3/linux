@@ -57,6 +57,8 @@
 #include <linux/uaccess.h>
 #include <asm/pgtable.h>
 
+#include <asm/hypsec_host.h>
+
 #include "coalesced_mmio.h"
 #include "async_pf.h"
 #include "vfio.h"
@@ -4409,37 +4411,37 @@ int kvm_init(void *opaque, unsigned vcpu_size, unsigned vcpu_align,
 	return 0;
 
 out_unreg:
-	print_string("in out_unreg\n")
+	print_string("in out_unreg\n");
 	kvm_async_pf_deinit();
-	print_string("in out_unreg finished\n")
+	print_string("in out_unreg finished\n");
 out_free:
-	print_string("in out_free \n")
+	print_string("in out_free \n");
 	kmem_cache_destroy(kvm_vcpu_cache);
-	print_string("in out_free finished\n")
+	print_string("in out_free finished\n");
 out_free_3:
-	print_string("in out_free_3 \n")
+	print_string("in out_free_3 \n");
 	unregister_reboot_notifier(&kvm_reboot_notifier);
 	cpuhp_remove_state_nocalls(CPUHP_AP_KVM_STARTING);
-	print_string("in out_free_3 finished\n")
+	print_string("in out_free_3 finished\n");
 out_free_2:
-	print_string("in out_free_2 \n")
+	print_string("in out_free_2 \n");
 	kvm_arch_hardware_unsetup();
-	print_string("in out_free_2 finished\n")
+	print_string("in out_free_2 finished\n");
 out_free_1:
-	print_string("in out_free_1 \n")
+	print_string("in out_free_1 \n");
 	kvm_arch_hardware_unsetup();
 	free_cpumask_var(cpus_hardware_enabled);
-	print_string("in out_free_1: finished \n")
+	print_string("in out_free_1: finished \n");
 out_free_0:
-	print_string("in out_free_0:\n")
+	print_string("in out_free_0:\n");
 	kvm_irqfd_exit();
-	print_string("in out_free_0: finished \n")
+	print_string("in out_free_0: finished \n");
 out_irqfd:
-	print_string("in out_irqfd\n")
+	print_string("in out_irqfd\n");
 	kvm_arch_exit();
-	print_string("in out_irqfd: finished \n")
+	print_string("in out_irqfd: finished \n");
 out_fail:
-	print_string("in out_fail returning r\n")
+	print_string("in out_fail returning r\n");
 	return r;
 }
 EXPORT_SYMBOL_GPL(kvm_init);
