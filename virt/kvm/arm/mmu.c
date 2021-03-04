@@ -668,7 +668,12 @@ static void create_hyp_pte_mappings(pmd_t *pmd, unsigned long start,
 
 static int create_hyp_pmd_mappings(pud_t *pud, unsigned long start,
 				   unsigned long end, unsigned long pfn,
+
+#ifdef CONFIG_VERIFIED_KVM
+				   pgprot_t prot, bool sec)
+#else
 				   pgprot_t prot)
+#endif
 {
 	pmd_t *pmd;
 	pte_t *pte;
@@ -683,20 +688,35 @@ static int create_hyp_pmd_mappings(pud_t *pud, unsigned long start,
 		if (pmd_none(*pmd)) {
 #ifndef CONFIG_VERIFIED_KVM
 			pte = pte_alloc_one_kernel(NULL);
-#else
-			pte = phys_to_virt(host_alloc_pte(1));
-#endif
 			if (!pte) {
 				kvm_err("Cannot allocate Hyp pte\n");
 				return -ENOMEM;
 			}
-			kvm_pmd_populate(pmd, pte);
+			pmd_populate_kernel(NULL, pmd, pte);
 			get_page(virt_to_page(pmd));
+#else
+			if (sec == false) {
+				pte = phys_to_virt(host_alloc_pte(1));
+				if (!pte) {
+					kvm_err("Cannot allocate Hyp pte\n");
+					return -ENOMEM;
+				}
+				pmd_populate_kernel(NULL, pmd, pte);
+				get_page(virt_to_page(pmd));
+			} else {
+				get_page(virt_to_page(pmd));
+				kvm_set_pmd(pmd, pmd_mkhuge(pfn_pmd(pfn, prot)));
+			}
+#endif
 		}
 
 		next = pmd_addr_end(addr, end);
-
+#ifdef CONFIG_VERIFIED_KVM
+		if (sec == false)
+			create_hyp_pte_mappings(pmd, addr, next, pfn, prot);
+#else
 		create_hyp_pte_mappings(pmd, addr, next, pfn, prot);
+#endif
 		pfn += (next - addr) >> PAGE_SHIFT;
 	} while (addr = next, addr != end);
 
@@ -705,7 +725,11 @@ static int create_hyp_pmd_mappings(pud_t *pud, unsigned long start,
 
 static int create_hyp_pud_mappings(pgd_t *pgd, unsigned long start,
 				   unsigned long end, unsigned long pfn,
+#ifdef CONFIG_VERIFIED_KVM
+				   pgprot_t prot, bool sec)
+#else
 				   pgprot_t prot)
+#endif
 {
 	pud_t *pud;
 	pmd_t *pmd;
@@ -731,7 +755,11 @@ static int create_hyp_pud_mappings(pgd_t *pgd, unsigned long start,
 		}
 
 		next = pud_addr_end(addr, end);
+#ifdef CONFIG_VERIFIED_KVM
+		ret = create_hyp_pmd_mappings(pud, addr, next, pfn, prot, sec);
+#else
 		ret = create_hyp_pmd_mappings(pud, addr, next, pfn, prot);
+#endif
 		if (ret)
 			return ret;
 		pfn += (next - addr) >> PAGE_SHIFT;
@@ -748,10 +776,17 @@ static int __create_hyp_mappings(pgd_t *pgdp, unsigned long ptrs_per_pgd,
 	pud_t *pud;
 	unsigned long addr, next;
 	int err = 0;
+#ifdef CONFIG_VERIFIED_KVM
+	bool sec = false;
+#endif
 
 	mutex_lock(&kvm_hyp_pgd_mutex);
 	addr = start & PAGE_MASK;
 	end = PAGE_ALIGN(end);
+#ifdef CONFIG_VERIFIED_KVM
+	if ((end - start) == PMD_SIZE)
+		sec = true;
+#endif
 	do {
 		pgd = pgdp + kvm_pgd_index(addr, ptrs_per_pgd);
 
@@ -771,7 +806,11 @@ static int __create_hyp_mappings(pgd_t *pgdp, unsigned long ptrs_per_pgd,
 		}
 
 		next = pgd_addr_end(addr, end);
+#ifdef CONFIG_VERIFIED_KVM
+		err = create_hyp_pud_mappings(pgd, addr, next, pfn, prot, sec);
+#else
 		err = create_hyp_pud_mappings(pgd, addr, next, pfn, prot);
+#endif
 		if (err)
 			goto out;
 		pfn += (next - addr) >> PAGE_SHIFT;
@@ -820,6 +859,7 @@ int create_hyp_mappings(void *from, void *to, pgprot_t prot)
 	unsigned long end = ((unsigned long)to >= PAGE_OFFSET) ?
 				kern_hyp_va((unsigned long)to) :
 				(unsigned long)to | EL2_PAGE_OFFSET;
+	unsigned long size = PAGE_SIZE;
 #endif
 
 	if (is_kernel_in_hyp_mode())
@@ -827,13 +867,27 @@ int create_hyp_mappings(void *from, void *to, pgprot_t prot)
 
 	start = start & PAGE_MASK;
 	end = PAGE_ALIGN(end);
+#ifdef CONFIG_VERIFIED_KVM
+	if (!(start % PMD_SIZE) && !((end - start) % PMD_SIZE)) {
+		size = PMD_SIZE;
+		printk("SeKVM: MAP SECTION: %s start %lx end %lx\n", __func__, start, end);
+	}
+#endif
 
+#ifdef CONFIG_VERIFIED_KVM
+	for (virt_addr = start; virt_addr < end; virt_addr += size) {
+#else
 	for (virt_addr = start; virt_addr < end; virt_addr += PAGE_SIZE) {
+#endif
 		int err;
 
 		phys_addr = kvm_kaddr_to_phys(from + virt_addr - start);
 		err = __create_hyp_mappings(hyp_pgd, PTRS_PER_PGD,
+#ifdef CONFIG_VERIFIED_KVM
+					    virt_addr, virt_addr + size,
+#else
 					    virt_addr, virt_addr + PAGE_SIZE,
+#endif
 					    __phys_to_pfn(phys_addr),
 					    prot);
 		if (err)
