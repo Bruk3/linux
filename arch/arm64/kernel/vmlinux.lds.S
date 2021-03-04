@@ -252,6 +252,10 @@ SECTIONS
 
 #ifdef CONFIG_VERIFIED_KVM
 	. = ALIGN(SEGMENT_ALIGN);
+	dtb_copy_start = .;
+	. += SZ_2M * 4;
+	dtb_copy_end =.;	
+
 	stage2_pgs_start = .;
 	. += STAGE2_PAGES_SIZE;
 	stage2_pgs_end = .;
@@ -261,6 +265,7 @@ SECTIONS
 	. += CORE_DATA_SIZE;
 	el2_data_end = .;
 
+	. = ALIGN(PAGE_SIZE);
 	shared_data_start = .;
 	. += PAGE_SIZE * (PAGE_SIZE * 4);
 	shared_data_end = .;
