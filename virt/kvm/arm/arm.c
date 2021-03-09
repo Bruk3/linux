@@ -102,6 +102,7 @@ int kvm_arch_vcpu_should_kick(struct kvm_vcpu *vcpu)
 static void install_el2_runtime(void *discard)
 {
 	kvm_call_core(HVC_ENABLE_S2_TRANS);
+	printk("HypSec EL2 runtime just installed on 1 cpu\n");
 }
 #endif
 

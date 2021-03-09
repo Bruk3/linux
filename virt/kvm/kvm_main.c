@@ -4354,7 +4354,9 @@ int kvm_init(void *opaque, unsigned vcpu_size, unsigned vcpu_align,
 		goto out_free_0;
 	}
 
+	pr_info("kvm: calling kvm_arch_hardware_setup\n");
 	r = kvm_arch_hardware_setup();
+	pr_info("kvm: kvm_arch_hardware_setup returned\n");
 	if (r < 0)
 		goto out_free_1;
 

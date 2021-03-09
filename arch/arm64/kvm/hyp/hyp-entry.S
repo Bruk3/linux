@@ -113,7 +113,6 @@ el1_sync:				// Guest trapped into EL2
 	cmp	x0, #ESR_ELx_EC_DABT_LOW
 	b.eq	5f
 	cmp	x0, #ESR_ELx_EC_IABT_LOW
-	bl 		bruk_asm_print_before_trap
 	b.ne	el1_trap
 
 5:
